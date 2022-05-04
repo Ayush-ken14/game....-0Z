@@ -4,10 +4,100 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>gZ Game</title>
+    <title>Js Game</title>
     <link  href="https://fonts.googleapis.com/css2?family=Josefin+Sans:ital,wght@1,300&display=swap"
      rel="stylesheet">
-     <link rel="stylesheet" href="gZ.css">
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+            font-family: 'Josefin Sans', sans-serif;
+        }
+        .hide {
+            display: none;
+        }
+        
+        .cargame {
+            width: 100%;
+            height: 100vh;
+            background-image: url(game6.png);
+            background-repeat: no-repeat;
+            background-size: 100% 100%;
+        }
+        .car {
+            width: 50px; height: 70px; background:#47484c;
+            position: absolute;
+            bottom: 120px;
+            border-radius: 12px;
+            background-image: url(find12.png);
+            background-repeat: no-repeat;
+            background-size: 100% 100%;
+        }
+        .enemy  {
+            width: 50px; height: 70px; background:#47484c;
+            position: absolute;
+            bottom: 120px;
+            border-radius: 12px;
+            background-image: url(car4.png);
+            background-repeat: no-repeat;
+            background-size: 100% 100%;
+        }
+        .lines {
+            width: 10px;
+            height: 100px;
+            background: white;
+            position: absolute;
+            margin-left: 195px;
+        }
+        .gamearea {
+            width: 400px;
+            height: 100vh;
+            background: #47484c ;
+            margin: auto;
+            position: relative;
+            overflow: hidden;
+            border-right: 7px dashed #c8d6e5;
+            border-left: 7px dashed #c8d6e5;
+        }
+        .score {
+            position: absolute;
+            top: 15px;
+            left: 40px;
+            background: #10ac84;
+            width: 300px;
+            /* height: 70px; */
+            line-height: 70px;
+            text-align: center;
+            color: white;
+            font-size: 1.5em;
+            /* font-family: fantasy; */
+            box-shadow: 0 5px 5px #777;
+        }
+        .startscreen {
+            position: absolute;
+            background-color: #ee5253;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            z-index: 1;
+            text-align: center;
+            border: 1px solid #ff6b6b;
+            padding: 15px;
+            margin: auto;
+            width: 50%;
+            cursor: pointer;
+            font-family: carfont;
+            letter-spacing: 5;
+            font-size: 20px;
+            letter-spacing: 5;
+            font-size: 20px;
+            word-spacing: 3;
+            line-height: 30px;
+            text-transform: uppercase;
+            box-shadow: 0 5px 5px #777;
+        }
+    </style>
 </head>
 <body>
     <div class="cargame">
@@ -20,6 +110,191 @@
         </div>
         <div class="gamearea">hello</div>
     </div>
-    <script src="gZ.js"></script>
-    </body>
-</html>
+    <script>
+        const score = document.querySelector('.score');
+
+        const startscreen = document.querySelector('.startscreen');
+
+        const gamearea = document.querySelector('.gamearea');
+
+       
+        startscreen.addEventListener('click', start);
+
+        let player = { speed : 5, score: 0} ;
+
+        let keys = {ArrowUp : false, ArrowDown :false, ArrowLeft :false, 
+        ArrowRight : false }
+
+        document.addEventListener('keydown', keyDown);
+
+        document.addEventListener('keyup',keyUp);
+
+        function keyDown(e){
+            e.preventDefault();
+
+            keys[e.key] = true;
+           // console.log(e.key);
+            // console.log(keys);
+        }
+
+        function keyUp(e){
+            e.preventDefault();
+            keys[e.key] = false;
+            //console.log(e.key);
+            // console.log(keys);
+        }
+
+        //   for stop after collision 
+
+
+        //   a:-> may car 
+        //     b:->   enemy car     
+
+        function iscollide(a,b){
+            
+            arect = a.getBoundingClientRect();
+            brect = b.getBoundingClientRect();
+
+            return !((arect.bottom < brect.top) || (arect.top > brect.bottom) ||
+            (arect.right < brect.left) || (arect.left > brect.right))
+        }
+        function movelines() {
+            let lines = document.querySelectorAll('.lines');
+
+            lines.forEach(function(item) {
+
+                if(item.y >= 700)
+                {
+                    item.y -= 750;
+                }
+                item.y += player.speed;
+                item.style.top = item.y + "px";
+            } )
+
+        }
+           
+           function endgame(){
+               player.start = false;
+               startscreen.classList.remove('hide');
+               startscreen.innerHTML = "Game Over <br> Your final score is : "+
+               player.score + " <br> Press here to restart the Game !";
+           }
+
+           function moveenemy(car) {
+            let enemy = document.querySelectorAll('.enemy');
+
+            enemy.forEach(function(item) {
+
+                if(iscollide(car, item)){
+                    console.log('boom hit');
+                    endgame();
+                }
+
+                if(item.y >= 650)
+                {
+                    item.y -= 600;
+                    item.style.left = Math.floor(Math.random() * 350) + "px";
+                }
+                item.y += player.speed;
+                item.style.top = item.y + "px";
+            } )
+
+        }
+
+
+        function gameplay(){
+            // console.log("Hey I am clicked.");
+
+            let car = document.querySelector('.car');
+            let road = gamearea.getBoundingClientRect();
+            if(player.start){
+
+                movelines();
+
+                moveenemy(car);
+                // king 
+
+                if(keys.ArrowUp && player.y > (road.top + 70)) { player.y -= player.speed} 
+                if(keys.ArrowDown && player.y < (road.bottom - 85)) {player.y += player.speed}
+
+                if(keys.ArrowLeft && player.x > 0) { player.x -= player.speed} 
+                if(keys.ArrowRight && player.x < (road.width - 50)) {player.x += player.speed}
+
+                car.style.top = player.y + "px";
+                car.style.left = player.x + "px";
+
+             window.requestAnimationFrame(gameplay);
+            //  console.log(player.score++);
+
+             player.score++;
+
+             let ps = player.score -1;
+             score.innerHTML = "score: "+ ps;
+            } 
+        } 
+
+        function start(){
+
+            // gamearea.classList.remove('hide');
+
+            startscreen.classList.add('hide');
+
+            gamearea.innerHTML = "";
+
+            player.start = true;
+
+            player.score = 0;
+            window.requestAnimationFrame(gameplay);
+
+            for(x=0;x<5;x++) 
+            {
+                let roadline = document.createElement('div');
+                roadline.setAttribute('class', 'lines');
+                roadline.y = (x*162);
+                roadline.style.top = roadline.y + "px";
+                gamearea.appendChild(roadline);
+            }
+
+            // let roadline = document.createElement('div');
+            //     roadline.setAttribute('class', 'lines');
+            //     // roadline.style.top = (x*150) + "px";
+            //     gamearea.appendChild(roadline);
+
+
+            let car = document.createElement('div');
+
+            car.setAttribute('class', 'car');
+            // car.innerText = ""
+            gamearea.appendChild(car);
+
+            player.x = car.offsetLeft;
+            player.y = car.offsetTop;
+
+            for(x=0;x<3;x++) 
+            {
+                let enemycar = document.createElement('div');
+                enemycar.setAttribute('class', 'enemy');
+                enemycar.y = ((x+1) * 350) * -1;
+                enemycar.style.top = enemycar.y + "px";
+
+                // style by js 
+                // enemycar.style.backgroundColor = randomcolor();
+
+                enemycar.style.left = Math.floor(Math.random() * 350) + "px";
+                gamearea.appendChild(enemycar);
+            } 
+
+
+            //  random colour for enemy car 
+
+            function randomcolor(){
+                function c (){
+                    let hex = Math.floor(Math.random() * 256).toString(16);
+                    return ("0" + String(hex).substr(-2))
+                }
+                return "#"+c()+c()+c();
+            }
+        }
+    </script>
+</body>
+</html>  
